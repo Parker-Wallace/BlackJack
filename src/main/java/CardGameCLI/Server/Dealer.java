@@ -17,7 +17,10 @@ import CardGameCLI.Hand;
 import CardGameCLI.PlayingCard;
 import CardGameCLI.Shoe;
 
-
+/**
+ * Represents a Dealer for a networked game of Blackjack.
+ * contains all the necessary objects and methods to run a networked game of Blackjack.
+ */
 public class Dealer implements Runnable {
     private Socket clientSocket;
     private Shoe shoe;
@@ -25,7 +28,10 @@ public class Dealer implements Runnable {
     private BlackJack game;
    
 
-
+    /**
+     * Creates an instanced object of type Dealer
+     * @param socket the client socket in which this dealer will communicate and listen for commands
+     */
     public Dealer(Socket socket) {
         this.clientSocket = socket;
         this.shoe = new Shoe(6);
@@ -54,47 +60,53 @@ public class Dealer implements Runnable {
         
     }
 
+    /**
+     * Handles the command as given bby the Client over this Dealers Socket.
+     * Builds up a JSONObject to send over the Output object for the Client to recieve
+     * @param command The command which the Client has sent for this Dealer to interperet.
+     *                Must be one of the options previoulsy provided by this Dealer
+     * @param parser A JSON Parser which will be used to grab JSON objects as sent by the Client.
+     * @param outputObject The JSON object which the method will add to to be sent to the client.
+     * @throws ParseException
+     * @throws InterruptedException
+     */
     @SuppressWarnings("unchecked")
     private void handleRequest(String command, JSONParser parser, JSONObject outputObject) throws ParseException, InterruptedException {
         JSONObject commandAsJsonObject = (JSONObject) parser.parse(command);
         String request = ((String) commandAsJsonObject.get("command")).trim().toLowerCase();
-        int userbet = ((Number) commandAsJsonObject.get("pot")).intValue();
         switch (request) {
             case "bet" -> {
+                int userbet = ((Number) commandAsJsonObject.get("pot")).intValue();
                 this.game = new BlackJack(new ArrayList<>(Arrays.asList(deal(), deal())), new ArrayList<>(Arrays.asList(deal(), deal())), userbet );
-                outputObject.put("cards",  game.playerhand.toString());
+                outputObject.put("cards",  game.playerHand.toString());
                 outputObject.put("dealercards", game.dealerHand.cards.get(0).toString());
                 this.action = gamestates.INPLAY;
-                // process the bet and deal cards
             }
             case "hit" -> {
-                game.hit(deal(), game.playerhand);
+                game.hit(deal(), game.playerHand);
                 if (game.gameState == false) {
                     outputObject.put("status", "bust");
                     this.action = gamestates.END;
                 } else {
-                    outputObject.put("cards",  game.playerhand.toString());
-                    outputObject.put("dealercards", game.dealerHand.cards.get(0).toString());
-                    
+                    outputObject.put("cards",  game.playerHand.toString());
+                    outputObject.put("dealercards", game.dealerHand.cards.get(0).toString()); 
                 }
-                // deal an extra card and check gamestate
             }
             case "stay" -> {
                 while (willHit(game.dealerHand)) {
                     game.hit(deal(), game.dealerHand);
                 }
-                if (game.checkWinner() == game.playerhand) {
-                    outputObject.put("cards",  game.playerhand.toString());
+                if (game.checkWinner() == game.playerHand) {
+                    outputObject.put("cards",  game.playerHand.toString());
                     outputObject.put("dealercards", game.dealerHand.toString());
                     outputObject.put("message", "player wins");
-                    outputObject.put("winnings", userbet * 2);
+                    outputObject.put("winnings", game.bet * 2);
                 } else {
-                    outputObject.put("cards",  game.playerhand.toString());
+                    outputObject.put("cards",  game.playerHand.toString());
                     outputObject.put("dealercards", game.dealerHand.toString());
                     outputObject.put("message","house wins");
                 }
                 this.action = gamestates.END;
-                // swict gamestate to dealer and play, then check winner
             }
             default -> {
                 outputObject.put("message", "sorry i didnt quit understand " + "\"" + request + "\"" + '\n' + outputObject.get("message"));}
@@ -102,6 +114,9 @@ public class Dealer implements Runnable {
         outputObject.put("options", CommandList(this.action));
     }
 
+    /**
+     * GameStates for this Dealer to decide which commands and actions this Dealer should take
+     */
     public enum gamestates {
         START,
         INPLAY,
@@ -109,6 +124,11 @@ public class Dealer implements Runnable {
         END
     }
 
+    /**
+     * Checks wether or not the dealer will 'hit' on their hand at any given point.
+     * @param hand this Dealer's hand as part of the running Blackjack game.
+     * @return Wether or not this Dealer will 'hit' on their current hand, based on score.
+     */
     public boolean willHit(Hand hand) {
         return hand.getScore() < 17;
     }
@@ -126,30 +146,11 @@ public class Dealer implements Runnable {
         return options;
     }
 
-    
+    /**
+     * Deals a card from this Dealer's Shoe.
+     * @return a PlayingCard from this Dealer's Shoe
+     */
     public PlayingCard deal() {
         return shoe.drawCard();
     }
-
-    public JSONObject creategamePackage() {
-        JSONObject gamepackageoJSONObject = new JSONObject();
-        gamepackageoJSONObject.put("message", null);
-        gamepackageoJSONObject.put("cards", null);
-        gamepackageoJSONObject.put("status", null);
-        gamepackageoJSONObject.put("pot", null);
-        gamepackageoJSONObject.put("options", new ArrayList<String>());
-        return gamepackageoJSONObject;
-    }
 }
-
-
-// flow
-// send hello
-// give options
-// recieve bet
-// deal cards
-// give options
-// handle options
-// skip if bust, play if stand
-// issue c"winnings"
-// play agaian

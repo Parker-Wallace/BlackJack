@@ -93,6 +93,10 @@ public class PlayingCard {
         return String.format("%s%s", value, face);
     }
 
+    /**
+     * Generates an ascii art representation of this card.
+     * @return String: a ascii art representation of this card.
+     */
     public String generateAsciiCard() {
         String value;
         String face = "";

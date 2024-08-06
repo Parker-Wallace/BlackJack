@@ -5,18 +5,23 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+/**
+ * A class for handling animations and graphics for a Blackjack game
+ */
 public class GUI {
-    final public static void GAMEHEADER() {}
 
+    /**
+     * Grabs the Welcome animation and plays its animation frames.
+     */
     final public static void GAMEWelcome() {
         String[] frames = {
-            "src/main/java/Projects/CardGameCLI/Client/GUI/Welcome/frame1.txt",
-            "src/main/java/Projects/CardGameCLI/Client/GUI/Welcome/frame2.txt",
-            "src/main/java/Projects/CardGameCLI/Client/GUI/Welcome/frame3.txt",
-            "src/main/java/Projects/CardGameCLI/Client/GUI/Welcome/frame4.txt",
-            "src/main/java/Projects/CardGameCLI/Client/GUI/Welcome/frame5.txt",
-            "src/main/java/Projects/CardGameCLI/Client/GUI/Welcome/frame6.txt",
-            "src/main/java/Projects/CardGameCLI/Client/GUI/Welcome/frame7.txt"
+            "src/main/java/CardGameCLI/Client/GUI/Welcome/frame1.txt",
+            "src/main/java/CardGameCLI/Client/GUI/Welcome/frame2.txt",
+            "src/main/java/CardGameCLI/Client/GUI/Welcome/frame3.txt",
+            "src/main/java/CardGameCLI/Client/GUI/Welcome/frame4.txt",
+            "src/main/java/CardGameCLI/Client/GUI/Welcome/frame5.txt",
+            "src/main/java/CardGameCLI/Client/GUI/Welcome/frame6.txt",
+            "src/main/java/CardGameCLI/Client/GUI/Welcome/frame7.txt"
             };
             try {
                     playAnimation(frames, 400);
@@ -25,12 +30,16 @@ public class GUI {
             }
 
     }
+
+    /**
+     * Grabs the Bust animation and plays its animation frames.
+     */
     final public static void PRINTBUST () {        
         String[] frames = {
-        "src/main/java/Projects/CardGameCLI/Client/GUI/BustAnimation/frame1.txt",
-        "src/main/java/Projects/CardGameCLI/Client/GUI/BustAnimation/frame2.txt",
-        "src/main/java/Projects/CardGameCLI/Client/GUI/BustAnimation/frame3.txt",
-        "src/main/java/Projects/CardGameCLI/Client/GUI/BustAnimation/frame4.txt"
+        "src/main/java/CardGameCLI/Client/GUI/BustAnimation/frame1.txt",
+        "src/main/java/CardGameCLI/Client/GUI/BustAnimation/frame2.txt",
+        "src/main/java/CardGameCLI/Client/GUI/BustAnimation/frame3.txt",
+        "src/main/java/CardGameCLI/Client/GUI/BustAnimation/frame4.txt"
         };
 
         try {
@@ -41,6 +50,13 @@ public class GUI {
             e.printStackTrace();
         }}
 
+    /**
+     * A method for printing a series of .txt files to create an animation.
+     * @param frames A simple String array containing a list of file paths to all the necessary .txt files as part of this animation.
+     * @param delay The amount of time in milliseconds to wait between each frame print.
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public static void playAnimation(String[] frames, int delay) throws IOException, InterruptedException {
             for (String frame : frames) {
                 clearConsole();
@@ -49,21 +65,33 @@ public class GUI {
             }
         }
 
+    /**
+     * Prints a .txt file to the console for the purposes of printing large ascii art animations.
+     * @param framePath The file path of the .txt file to print to the console.
+     * @throws IOException
+     */
     private static void printFrame(String framePath) throws IOException {
         List<String> lines = Files.readAllLines(Paths.get(framePath));
         for (String line : lines) {
             System.out.println(line);
         }
     }
+
+    /**
+     * Seperates a stringifies array of cards on the comma ',' character..
+     * Must be in the format "10v,9o,k$".
+     * @param cards The Stringified array of cards delimmited by the comma ','.
+     * @return A String array of all the cards passed into this method.
+     */
     private static String[] getcards(String cards) {
-            // Split the input string by commas
             String[] result = cards.split(",");
-            
-            // Return the array of cards
             return result;
         }
         
-
+    /**
+     * Prints ascii art representation of the cards passed into this array on the same lines.
+     * @param cards The stringified array of cards or card delimmited by the ',' comma character .
+     */
     public static void printCards(String cards) {
         String[] cardsList = getcards(cards);
         String[] cardLines = new String[7];
@@ -115,19 +143,24 @@ public class GUI {
                 }
             }
         }
-
-        // Print each line
         for (String line : cardLines) {
             System.out.println(line);
         }
     }
 
+    /**
+     * Prints a header to display the number of 'chips' available to the method caller.
+     * @param chips
+     */
     public static void printChips(int chips) {
-        System.out.println("***************");
+        System.out.println("**********************");
         System.out.println("chips available: " + chips);
         System.out.println("**********************");
     }
 
+    /**
+     * Prints the chars to clear the text from the console for a clean GUI.
+     */
     public static void clearConsole() {
         try {
             if (System.getProperty("os.name").contains("Windows")) {

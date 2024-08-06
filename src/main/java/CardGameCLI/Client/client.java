@@ -13,13 +13,24 @@ import org.json.simple.parser.ParseException;
 
 import CardGameCLI.Client.GUI.GUI;
 
+/**
+ * Represents a Player in a game of networked Blackjack.
+ */
 class Client {
 	private int chips;
 
+	/**
+	 * Creates an instance of Client with 100 'chips' to bet with.
+	 */
 	public Client () {
 		this.chips = 100;
 	}
 
+	/**
+	 * Main method for this Client.
+	 * Contains While loop to connect, listen to and play the Blackjack game(s).
+	 * @param args
+	 */
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args)
 	{
@@ -35,12 +46,9 @@ class Client {
 				JSONParser parser = new JSONParser();
 				JSONObject jsonObject = new JSONObject();
 				while (true) {
-
 					String inboundMessage = in.readUTF();
 					JSONObject inboundObject = (JSONObject) parser.parse(inboundMessage);
 
-					
-					
 					GUI.clearConsole();
 					handleObject(inboundObject, client);
 
@@ -53,8 +61,7 @@ class Client {
 						}
 						else {
 							break;
-						}
-						
+						}						
 					}
                 if ("exit".equalsIgnoreCase(command)) {
                     break;
@@ -63,37 +70,29 @@ class Client {
 					if (client.chips == 0) {
 					System.out.println("looks like youre out of money...\n come back when you have more");
 					System.exit(1);
-				}
-						while (true) { 
-							System.out.println("how much would you like to bet?");
-							int betAmount = -1;
-							if (scanner.hasNextInt()) {
-								betAmount = scanner.nextInt();
-								scanner.nextLine(); // Consume the newline character left after nextInt()
-							} else {
-								System.out.println("Please enter a valid number.");
-								scanner.next(); // Clear invalid input
-							}
-							
-							if (betAmount < 0 || betAmount > client.chips) {
-								System.out.println("You don't have enough chips to make that kind of bet.");
-							} else {
-								client.chips -= betAmount;
-								jsonObject.put("pot", betAmount);
-								break;
-							}
+					}
+					while (true) { 
+						System.out.println("how much would you like to bet?");
+						int betAmount = -1;
+						if (scanner.hasNextInt()) {
+							betAmount = scanner.nextInt();
+							scanner.nextLine(); // Consume the newline character left after nextInt()
+						} else {
+							System.out.println("Please enter a valid number.");
+							scanner.next(); // Clear invalid input
+						}
+						
+						if (betAmount < 0 || betAmount > client.chips) {
+							System.out.println("You don't have enough chips to make that kind of bet.");
+						} else {
+							client.chips -= betAmount;
+							jsonObject.put("pot", betAmount);
+							break;
+						}
 					}
 				}
-
                 jsonObject.put("command", command);
-
-                // Send the JSON object to the server
                 out.writeUTF(jsonObject.toString());
-				
-                // Receive and print the response from the server
-                
-                //System.out.println(jsonResponse.get("message"));
-
 			} 
 		} 
 		catch (Exception e) { 
@@ -101,6 +100,12 @@ class Client {
 		} 
 	}
 
+	/**
+	 * Checks wether or not the command given exists within the options given provided by the connected Dealer object.
+	 * @param options The objects provided by the Dealer object.
+	 * @param command The command issued by the user.
+	 * @return True if the command exists within the provided options, otherwise false.
+	 */
 	private static Boolean checkCommand(JSONArray options, String command) {
 		boolean found = false;
         for (Object option : options) {
@@ -112,14 +117,24 @@ class Client {
 		return found;
 	}
 
+	/**
+	 * gets the value of the "options" key from the inboundobject sent by the Dealer
+	 * @param inboundObject the JSONObject which was sent this this Client by the Dealer.
+	 * @return an Array of options.
+	 * @throws IOException
+	 * @throws ParseException
+	 */
 	private static JSONArray getOptions(JSONObject inboundObject) throws IOException, ParseException {
 		return (JSONArray) inboundObject.get("options");
-
-
-        // Print the ArrayList to verify the contents
-        
     }
 
+	/**
+	 * Handles the JSONObject sent by the Dealer to this Client.
+	 * @param inboundObject The JSONObject sent to this Client by the Dealer
+	 * @param client this Client for the purpose of changing the chip value
+	 * @throws IOException
+	 * @throws ParseException
+	 */
 	private static void handleObject(JSONObject inboundObject, Client client) throws IOException, ParseException {
 		if (inboundObject.containsKey("status")) {
 			if (inboundObject.get("status").equals("bust")) {
@@ -150,13 +165,3 @@ class Client {
 	}
 	
 }
-
-
-// flow of play
-//hello
-//loop
-//place bet
-//get card
-//hit, stand
-// bust , dealer turn 
-// determine winner
